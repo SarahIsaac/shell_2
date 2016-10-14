@@ -8,7 +8,22 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-std::vector<std::string> parser(std::string command)
+
+class ExecuteCommand
+{
+public:
+	std::string input_file;
+	std::string output_file;
+	std::vector<std::vector<std::string>> commands;
+
+	ExecuteCommand()
+	{
+		input_file = "";
+		output_file = "";
+	}
+};
+
+std::vector<std::string> command_parser(std::string command)
 {
 	std::vector<std::string> command_list;
 	auto current = command.begin();
@@ -24,11 +39,98 @@ std::vector<std::string> parser(std::string command)
 	return command_list;
 }
 
+std::string remove_extra_spaces(std::string str)
+{
+	while (str[0] == ' ')
+	{
+		str = str.substr(1, str.size());
+
+	}
+	while (str[str.size()-1] == ' ')
+	{
+		str = str.substr(0, str.size()-1);
+	}
+	return str;
+}
+
+ExecuteCommand input_parser(std::string input)
+{
+	ExecuteCommand execute_command;
+	std::vector<std::string> command_list;
+	std::string unknown_word = "";
+	char last_command = ' ';
+;	for (int i = 0; i < input.size()+1; i++)
+	{
+		if (input[i] == '>')
+		{
+			if (last_command == '>')
+			{
+				if (unknown_word != "")
+					execute_command.output_file = remove_extra_spaces(unknown_word);
+			}
+			else if (last_command == ' ')
+			{
+				if (unknown_word != "")
+					execute_command.commands.push_back(command_parser(remove_extra_spaces(unknown_word)));
+			}
+			else if ('<')
+			{
+				if (unknown_word != "")
+					execute_command.input_file = remove_extra_spaces(unknown_word);
+			}
+			unknown_word = "";
+			last_command = '>';
+		}
+		else if (input[i] == '<')
+		{
+			if (last_command == '>')
+			{
+				if(unknown_word!="")
+					execute_command.output_file = remove_extra_spaces(unknown_word);
+			}
+			else if (last_command == ' ')
+			{
+				if (unknown_word != "")
+					execute_command.commands.push_back(command_parser(remove_extra_spaces(unknown_word)));
+			}
+			else if ('<')
+			{
+				if (unknown_word != "")
+					execute_command.input_file = remove_extra_spaces(unknown_word);
+			}
+			unknown_word = "";
+			last_command = '<';
+		}
+		else if (input[i] == '|' || i == input.size())
+		{
+			if (last_command == '>')
+			{
+				if (unknown_word != "")
+					execute_command.output_file = remove_extra_spaces(unknown_word);
+			}
+			else if (last_command == ' ')
+			{
+				if (unknown_word != "")
+					execute_command.commands.push_back(command_parser(remove_extra_spaces(unknown_word)));
+			}
+			else if ('<')
+			{
+				if (unknown_word != "")
+					execute_command.input_file = remove_extra_spaces(unknown_word);
+			}
+			unknown_word = "";
+			last_command = ' ';
+		}
+		else
+		{
+			unknown_word += input[i];
+		}
+	}
+	return execute_command;
+}
+
 int main()
 {
-	char command[200];
-	std::vector < std::string > command_history;
-	std::chrono::milliseconds ptime;
 
 	std::cout << "--------------------" << std::endl;
 	std::cout << "WELCOME" << std::endl;
@@ -40,18 +142,22 @@ int main()
 	std::cout << "--------------------" << std::endl;
 	std::cout << std::endl;
 
+	char command[200];
+	std::vector < std::string > command_history;
+	std::chrono::milliseconds ptime;
+
 	std::cout << "> ";
 	std::cin.getline(command, 200);
 
 	while (strcmp(command, "exit") != 0)
 	{
 		command_history.push_back(command);
-		std::vector<std::string> command_input = parser(command);
+		ExecuteCommand command_to_execute = input_parser(command);
 
 		//PTIME
-		if (command_input[0] == "ptime")
+		if (command_to_execute.commands[0][0] == "ptime")
 		{
-			std::cout << "Time (milliseconds) Executing Last Child Process: " << ptime.count() << " ms" << std::endl;
+			std::cout << "Total Time (milliseconds) Executing Child Processes: " << ptime.count() << std::endl;
 
 			std::cout << "> ";
 			std::cin.getline(command, 200);
@@ -59,7 +165,7 @@ int main()
 		}
 
 		//HISTORY
-		else if (command_input[0] == "History" || command_input[0] == "history")
+		else if (command_to_execute.commands[0][0] == "History" || command_to_execute.commands[0][0] == "history")
 		{
 			for (int i = 0; i < command_history.size(); i++)
 			{
@@ -72,48 +178,134 @@ int main()
 		}
 
 		//RUN ^HISTORY
-		else if (command_input[0] == "^")
+		else if (command_to_execute.commands[0][0] == "^")
 		{
-			int number = std::stoi(command_input[1]);
-			std::cout << command_history[number] << std::endl;
-			command_input = parser(command_history[number]);
+			int number = std::stoi(command_to_execute.commands[0][1]);
+			command_to_execute = input_parser(command_history[number]);
 		}
 
-		//package ready for process
-		char* arguments[20];
-		int j = 1;
-		for (int i = 0; i < command_input.size(); i++)
-		{
-			const char * c_string = command_input[i].c_str();
-			arguments[i] = strdup(c_string);
-			j++;
-		}
-		arguments[j] = nullptr;
+///////////////////////////////////////////
 
-		std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-		pid_t pid = fork();
+	//declare two pipes here
+		int pipe_1[2]
+		int pipe_2[2]
+		pipe(pipe_1)
+		pipe(pipe_2)
 
-		if (pid < 0)
+		//and a bool so you know which one to use...or just go off of if i is (even or odd) or odd
+		for (int i = 0; i < command_to_execute.commands.size(); i++)
 		{
-			perror("Error: ");
+			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+			pid_t pid = fork();
+
+			if (pid < 0)
+			{
+				perror("Error: ");
+			}
+
+			else if (pid > 0)
+			{
+				//this is the parent
+				int * pid_ptr = &pid;
+				wait(pid_ptr);
+				std::chrono::steady_clock::time_point stop = std::chrono::steady_clock::now();
+				ptime = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+			}
+
+			else
+			{
+				//this is the child process
+				//HANDLE THE CASE WHERE THERE IS ONLY ONE COMMAND...actually it might handle itself...
+				if (i == 0)
+				{
+					if (command_to_execute.input_file != "")
+					{
+						int file_descriptor = fopen(command_to_execute.input_file, "r");
+						//dup input file
+					}
+				}
+				if (i!=command_to_execute.commands.size()-1)
+				{
+					//pipe output to OTHER pipe
+				}
+				else if (i == command_to_execute.commands.size() - 1)
+				{
+					if (command_to_execute.output_file != "")
+					{
+						//fopen(filename, "w")
+						//dup output file to output of pipe
+					}
+				}
+
+
+				//package it correctly
+				for (int s = 0; s < command_to_execute.commands.size(); s++)
+				{
+					char* arguments[50];
+					int j = 1;
+					for (int i = 0; i < command_to_execute.commands[s].size(); i++)
+					{
+						const char * c_string = command_to_execute.commands[i][i].c_str();
+						arguments[i] = strdup(c_string);
+						j++;
+					}
+					arguments[j] = nullptr;
+				}
+
+				execvp(arguments[0], arguments);
+				perror("Error: "); 	//someething went terribly wrong if we hit this point
+				exit(pid); 	//don't break if bad command
+			}
+
 		}
 
-		else if (pid > 0)
-		{
-			//this is the parent
-			int * pid_ptr = &pid;
-			wait(pid_ptr);
-			std::chrono::steady_clock::time_point stop = std::chrono::steady_clock::now();
-			ptime = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-		}
 
-		else
-		{
-			//this is the child process
-			execvp(arguments[0], arguments);
-			perror("Error: "); 	//someething went terribly wrong if we hit this point
-			exit(pid); 	//don't break if bad command
-		}
+//////////////////////////////////////////////
+		// for (int s = 0; s < command_to_execute.commands.size(); s++)
+		// {
+		// 	char* arguments[50];
+		// 	int j = 1;
+		// 	for (int i = 0; i < command_to_execute.commands[s].size(); i++)
+		// 	{
+		// 		const char * c_string = command_to_execute.commands[i][i].c_str();
+		// 		arguments[i] = strdup(c_string);
+		// 		j++;
+		// 	}
+		// 	arguments[j] = nullptr;
+		// }
+		//
+		// std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+		// pid_t pid = fork();
+		//
+		// if (pid < 0)
+		// {
+		// 	perror("Error: ");
+		// }
+		//
+		// else if (pid > 0)
+		// {
+		// 	//this is the parent
+		// 	int * pid_ptr = &pid;
+		// 	wait(pid_ptr);
+		// 	std::chrono::steady_clock::time_point stop = std::chrono::steady_clock::now();
+		// 	ptime = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+		// }
+		//
+		// else
+		// {
+		// 	//this is the child process
+		//
+		// 	if (execute_command.input_file != "")
+		// 	{
+		// 		//have input file
+		// 	}
+		//
+		// 	if (execute_command.output_file && )
+		// 	///
+		// 	execvp(arguments[0], arguments);
+		// 	perror("Error: "); 	//someething went terribly wrong if we hit this point
+		// 	exit(pid); 	//don't break if bad command
+		// }
 
 		std::cout << "> ";
 		std::cin.getline(command, 200);
