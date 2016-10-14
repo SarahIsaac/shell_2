@@ -221,7 +221,8 @@ int main()
 					if (command_to_execute.input_file != "")
 					{
 						int file_descriptor = fopen(command_to_execute.input_file, "r");
-						//dup input file
+						//dup file descriptor onto read side of current pipe
+
 					}
 				}
 				if (i!=command_to_execute.commands.size()-1)
@@ -232,12 +233,12 @@ int main()
 				{
 					if (command_to_execute.output_file != "")
 					{
-						//fopen(filename, "w")
-						//dup output file to output of pipe
+						int file_descriptor = fopen(command_to_execute.output_file, "w");
+						//dup file descripton onto the write side of the current pipe
+
 					}
 				}
-
-
+				//dup current pipe output to ther pipes input
 				//package it correctly
 				for (int s = 0; s < command_to_execute.commands.size(); s++)
 				{
