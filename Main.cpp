@@ -215,29 +215,29 @@ int main()
 				{
 					if (command_to_execute.input_file != "")
 					{
-						int file_descriptor = fopen(command_to_execute.input_file, "r");
-						dup2(file_descriptor, STDIN);
+						int file_descriptor = fopen(command_to_execute.input_file.c_str(), "r".c_str());
+						dup2(file_descriptor, 0);
 					}
 				}
 				if (i != command_to_execute.commands.size() - 1)
 				{
 					if (i % 2 != 0)
 					{
-						dup2(pipe_1[0], STDIN);
-						dup2(pipe_2[1], STDOUT);
+						dup2(pipe_1[0], 0);	//STDIN
+						dup2(pipe_2[1], 1);	//STDOUT
 					}
 					else
 					{
-						dup2(pipe_2[0], STDIN);
-						dup2(pipe_1[1], STDOUT);
+						dup2(pipe_2[0], 0);
+						dup2(pipe_1[1], 1);
 					}
 				}
 				if (i == command_to_execute.commands.size() - 1)
 				{
 					if (command_to_execute.output_file != "")
 					{
-						int file_descriptor = fopen(command_to_execute.output_file, "w");
-						dup2(file_descriptor, STDOUT);
+						int file_descriptor = fopen(command_to_execute.output_file.c_str(), "w".c_str());
+						dup2(file_descriptor, 1);
 					}
 				}
 
