@@ -183,10 +183,10 @@ int main()
 			command_to_execute = input_parser(command_history[number]);
 		}
 
-		int pipe_1[2]
-		int pipe_2[2]
-		pipe(pipe_1)
-		pipe(pipe_2)
+		int pipe_1[2];
+		int pipe_2[2];
+		pipe(pipe_1);
+		pipe(pipe_2);
 
 		for (int i = 0; i < command_to_execute.commands.size(); i++)
 		{
@@ -242,18 +242,17 @@ int main()
 				}
 
 				//package it correctly
-				for (int s = 0; s < command_to_execute.commands.size(); s++)
+
+				char* arguments[50];
+				int j = 1;
+				for (int g = 0; g < command_to_execute.commands[i].size(); i++)
 				{
-					char* arguments[50];
-					int j = 1;
-					for (int i = 0; i < command_to_execute.commands[s].size(); i++)
-					{
-						const char * c_string = command_to_execute.commands[i][i].c_str();
-						arguments[i] = strdup(c_string);
-						j++;
-					}
-					arguments[j] = nullptr;
+					const char * c_string = command_to_execute.commands[i][g].c_str();
+					arguments[g] = strdup(c_string);
+					j++;
 				}
+				arguments[j] = nullptr;
+
 
 				execvp(arguments[0], arguments);
 				perror("Error: "); 	//someething went terribly wrong if we hit this point
