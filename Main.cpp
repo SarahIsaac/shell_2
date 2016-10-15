@@ -195,13 +195,11 @@ int main()
 
 			if (pid < 0)
 			{
-				// if we got here then something terrible happened
 				perror("Error: ");
 			}
 
 			else if (pid > 0)
 			{
-				//this is the parent
 				int * pid_ptr = &pid;
 				wait(pid_ptr);
 				std::chrono::steady_clock::time_point stop = std::chrono::steady_clock::now();
@@ -210,14 +208,13 @@ int main()
 
 			else
 			{
-				//this is the child process
 				if (i == 0 && command_to_execute.input_file != "")
 				{
 					//if first command and input file exists, dupe file_descriptor of file to stdin
 					std::string mode = "r";
 					FILE * file_descriptor = fopen(command_to_execute.input_file.c_str(), mode.c_str());
 					dup2(fileno(file_descriptor), fileno(stdin));
-					// fclose(file_descriptor);
+					fclose(file_descriptor);
 				}
 				else if (i != 0)
 				{
@@ -238,7 +235,7 @@ int main()
 					std::string mode = "w";
 					FILE * file_descriptor = fopen(command_to_execute.output_file.c_str(), mode.c_str());
 					dup2(fileno(file_descriptor), fileno(stdout));
-					// fclose(file_descriptor);
+					fclose(file_descriptor);
 				}
 				else if (i != command_to_execute.commands.size() - 1)
 				{
@@ -255,9 +252,13 @@ int main()
 				}
 
 				//package it correctly
+				std::vector<std::string> command_string = command_to_execute.commands[i];
+				int size = command_string.size();
 				char* arguments[50];
-				int j = 1;
-				for (int g = 0; g < command_to_execute.commands[i].size(); i++)
+
+				int j = 0;
+
+				for (int g = 0; g < size; g++)
 				{
 					const char * c_string = command_to_execute.commands[i][g].c_str();
 					arguments[g] = strdup(c_string);
