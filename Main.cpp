@@ -183,10 +183,10 @@ int main()
 			command_to_execute = input_parser(command_history[number]);
 		}
 
-		int pipe_1[2];
-		int pipe_2[2];
-		pipe(pipe_1);
-		pipe(pipe_2);
+		int pipe_a[2];
+		int pipe_b[2];
+		pipe(pipe_a);
+		pipe(pipe_b);
 
 		for (int i = 0; i < command_to_execute.commands.size(); i++)
 		{
@@ -211,37 +211,46 @@ int main()
 			else
 			{
 				//this is the child process
-				if (i == 0)
+				if (i == 0 && command_to_execute.input_file != "")
 				{
-					if (command_to_execute.input_file != "")
-					{
-						std::string mode = "r";
-						FILE * file_descriptor = fopen(command_to_execute.input_file.c_str(), mode.c_str());
-						dup2(fileno(file_descriptor), fileno(stdin));
-						fclose(file_descriptor);
-					}
+					//if first command and input file exists, dupe file_descriptor of file to stdin
+					std::string mode = "r";
+					FILE * file_descriptor = fopen(command_to_execute.input_file.c_str(), mode.c_str());
+					dup2(fileno(file_descriptor), fileno(stdin));
+					fclose(file_descriptor);
 				}
-				if (i != command_to_execute.commands.size() - 1)
+				else if (i != 0)
 				{
-					if (i % 2 != 0)
+					if (i % 2 == 0)
 					{
-						dup2(pipe_1[0], fileno(stdin));	//0
-						dup2(pipe_2[1], fileno(stdout));	//1
+						// dup pibeb[1] to input
+						dup2(pipe_b[1], fileno(stdin));
 					}
 					else
 					{
-						dup2(pipe_2[0], fileno(stdin));
-						dup2(pipe_1[1], fileno(stdout));
+						//dup pipe_a[1] to input
+						dup2(pipe_a[1], fileno(stdin));
 					}
 				}
-				if (i == command_to_execute.commands.size() - 1)
+				if (i == command_to_execute.commands.size() - 1 && command_to_execute.output_file != "")
 				{
-					if (command_to_execute.output_file != "")
+					// if last command and output file exists, dup file_descriptor to stdout
+					std::string mode = "w";
+					FILE * file_descriptor = fopen(command_to_execute.output_file.c_str(), mode.c_str());
+					dup2(fileno(file_descriptor), fileno(stdout));
+					fclose(file_descriptor);
+				}
+				else if (i != command_to_execute.commands.size() - 1)
+				{
+					if (i == 0 || i % 2 == 0)
 					{
-						std::string mode = "w";
-						FILE * file_descriptor = fopen(command_to_execute.output_file.c_str(), mode.c_str());
-						dup2(fileno(file_descriptor), fileno(stdout));
-						fclose(file_descriptor);
+						// dup pipe_a[0] to output
+						dup2(pipe_a[0], fileno(stdout));
+					}
+					else
+					{
+						// dup pipe_b[0] to output
+						dup2(pipe_b[0], fileno(stdout));
 					}
 				}
 
@@ -255,7 +264,6 @@ int main()
 					j++;
 				}
 				arguments[j] = nullptr;
-
 
 				execvp(arguments[0], arguments);
 				perror("Error: ");
