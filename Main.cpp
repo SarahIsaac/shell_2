@@ -184,15 +184,11 @@ int main()
 			command_to_execute = input_parser(command_history[number]);
 		}
 
-///////////////////////////////////////////
-
-	//declare two pipes here
 		int pipe_1[2]
 		int pipe_2[2]
 		pipe(pipe_1)
 		pipe(pipe_2)
 
-		//and a bool so you know which one to use...or just go off of if i is (even or odd) or odd
 		for (int i = 0; i < command_to_execute.commands.size(); i++)
 		{
 			std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
@@ -200,6 +196,7 @@ int main()
 
 			if (pid < 0)
 			{
+				// if we got here then something terrible happened
 				perror("Error: ");
 			}
 
@@ -215,30 +212,36 @@ int main()
 			else
 			{
 				//this is the child process
-				//HANDLE THE CASE WHERE THERE IS ONLY ONE COMMAND...actually it might handle itself...
 				if (i == 0)
 				{
 					if (command_to_execute.input_file != "")
 					{
 						int file_descriptor = fopen(command_to_execute.input_file, "r");
-						//dup file descriptor onto read side of current pipe
-
+						dup2(file_descriptor, STDIN);
 					}
 				}
-				if (i!=command_to_execute.commands.size()-1)
+				if (i != command_to_execute.commands.size() - 1)
 				{
-					//pipe output to OTHER pipe
+					if (i % 2 != 0)
+					{
+						dup2(pipe_1[0], STDIN);
+						dup2(pipe_2[1], STDOUT);
+					}
+					else
+					{
+						dup2(pipe_2[0], STDIN);
+						dup2(pipe_1[1], STDOUT);
+					}
 				}
-				else if (i == command_to_execute.commands.size() - 1)
+				if (i == command_to_execute.commands.size() - 1)
 				{
 					if (command_to_execute.output_file != "")
 					{
 						int file_descriptor = fopen(command_to_execute.output_file, "w");
-						//dup file descripton onto the write side of the current pipe
-
+						dup2(file_descriptor, STDOUT);
 					}
 				}
-				//dup current pipe output to ther pipes input
+
 				//package it correctly
 				for (int s = 0; s < command_to_execute.commands.size(); s++)
 				{
