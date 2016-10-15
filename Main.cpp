@@ -246,7 +246,6 @@ int main()
 				}
 
 				//package it correctly
-
 				char* arguments[50];
 				int j = 1;
 				for (int g = 0; g < command_to_execute.commands[i].size(); i++)
@@ -259,59 +258,11 @@ int main()
 
 
 				execvp(arguments[0], arguments);
-				perror("Error: "); 	//someething went terribly wrong if we hit this point
-				exit(pid); 	//don't break if bad command
+				perror("Error: ");
+				exit(pid);
 			}
 
 		}
-
-
-//////////////////////////////////////////////
-		// for (int s = 0; s < command_to_execute.commands.size(); s++)
-		// {
-		// 	char* arguments[50];
-		// 	int j = 1;
-		// 	for (int i = 0; i < command_to_execute.commands[s].size(); i++)
-		// 	{
-		// 		const char * c_string = command_to_execute.commands[i][i].c_str();
-		// 		arguments[i] = strdup(c_string);
-		// 		j++;
-		// 	}
-		// 	arguments[j] = nullptr;
-		// }
-		//
-		// std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
-		// pid_t pid = fork();
-		//
-		// if (pid < 0)
-		// {
-		// 	perror("Error: ");
-		// }
-		//
-		// else if (pid > 0)
-		// {
-		// 	//this is the parent
-		// 	int * pid_ptr = &pid;
-		// 	wait(pid_ptr);
-		// 	std::chrono::steady_clock::time_point stop = std::chrono::steady_clock::now();
-		// 	ptime = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-		// }
-		//
-		// else
-		// {
-		// 	//this is the child process
-		//
-		// 	if (execute_command.input_file != "")
-		// 	{
-		// 		//have input file
-		// 	}
-		//
-		// 	if (execute_command.output_file && )
-		// 	///
-		// 	execvp(arguments[0], arguments);
-		// 	perror("Error: "); 	//someething went terribly wrong if we hit this point
-		// 	exit(pid); 	//don't break if bad command
-		// }
 
 		std::cout << "> ";
 		std::cin.getline(command, 200);
