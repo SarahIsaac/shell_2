@@ -217,7 +217,7 @@ int main()
 					{
 						std::string mode = "r";
 						FILE * file_descriptor = fopen(command_to_execute.input_file.c_str(), mode.c_str());
-						dup2(fileno(file_descriptor), 0);
+						dup2(fileno(file_descriptor), fileno(stdin));
 						//fclose(file_descriptor);
 					}
 				}
@@ -225,13 +225,13 @@ int main()
 				{
 					if (i % 2 != 0)
 					{
-						dup2(pipe_1[0], 0);	//STDIN
-						dup2(pipe_2[1], 1);	//STDOUT
+						dup2(pipe_1[0], fileno(stdin));	//0
+						dup2(pipe_2[1], fileno(stdout));	//1
 					}
 					else
 					{
-						dup2(pipe_2[0], 0);
-						dup2(pipe_1[1], 1);
+						dup2(pipe_2[0], fileno(stdin));
+						dup2(pipe_1[1], fileno(stdout));
 					}
 				}
 				if (i == command_to_execute.commands.size() - 1)
@@ -240,7 +240,7 @@ int main()
 					{
 						std::string mode = "w";
 						FILE * file_descriptor = fopen(command_to_execute.output_file.c_str(), mode.c_str());
-						dup2(fileno(file_descriptor), 1);
+						dup2(fileno(file_descriptor), fileno(stdout));
 						//fclose(file_descriptor);
 					}
 				}
