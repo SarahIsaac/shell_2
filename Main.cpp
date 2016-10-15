@@ -215,7 +215,8 @@ int main()
 				{
 					if (command_to_execute.input_file != "")
 					{
-						int file_descriptor = fopen(command_to_execute.input_file.c_str(), "r".c_str());
+						std::string mode = "r";
+						int file_descriptor = fopen(command_to_execute.input_file.c_str(), mode.c_str());
 						dup2(file_descriptor, 0);
 					}
 				}
@@ -236,7 +237,8 @@ int main()
 				{
 					if (command_to_execute.output_file != "")
 					{
-						int file_descriptor = fopen(command_to_execute.output_file.c_str(), "w".c_str());
+						std::string mode = "w";
+						int file_descriptor = fopen(command_to_execute.output_file.c_str(), mode.c_str());
 						dup2(file_descriptor, 1);
 					}
 				}
