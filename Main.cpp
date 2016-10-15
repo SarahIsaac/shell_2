@@ -217,7 +217,8 @@ int main()
 					{
 						std::string mode = "r";
 						FILE * file_descriptor = fopen(command_to_execute.input_file.c_str(), mode.c_str());
-						dup2(file_descriptor, 0);
+						dup2(fileno(file_descriptor), 0);
+						fclose(file_descriptor);
 					}
 				}
 				if (i != command_to_execute.commands.size() - 1)
@@ -239,7 +240,8 @@ int main()
 					{
 						std::string mode = "w";
 						FILE * file_descriptor = fopen(command_to_execute.output_file.c_str(), mode.c_str());
-						dup2(file_descriptor, 1);
+						dup2(fileno(file_descriptor), 1);
+						fclose(file_descriptor);
 					}
 				}
 
