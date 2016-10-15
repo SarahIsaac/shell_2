@@ -1,8 +1,4 @@
 cmake_minimum_required (VERSION 2.6)
 project (Shell)
-option(USE_CLANG "useClang" OFF)
-if(USE_CLANG)
-    SET(CMAKE_CXX_FLAGS_INIT "-fsanitizer=address")
-endif(USE_CLANG)
 add_definitions(-std=c++11)
 add_executable (Shell Main.cpp)
