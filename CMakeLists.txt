@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 2.6)
 project (Shell)
-option(USE_CLANG "build app with clang" ON)
+option(USE_CLANG "use clang")
 if(USE_CLANG)
     SET(CMAKE_CXX_FLAGS_INIT "-fsanitizer=address")
 endif(USE_CLANG)
