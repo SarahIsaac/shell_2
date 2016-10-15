@@ -217,7 +217,7 @@ int main()
 					std::string mode = "r";
 					FILE * file_descriptor = fopen(command_to_execute.input_file.c_str(), mode.c_str());
 					dup2(fileno(file_descriptor), fileno(stdin));
-					fclose(file_descriptor);
+					// fclose(file_descriptor);
 				}
 				else if (i != 0)
 				{
@@ -238,7 +238,7 @@ int main()
 					std::string mode = "w";
 					FILE * file_descriptor = fopen(command_to_execute.output_file.c_str(), mode.c_str());
 					dup2(fileno(file_descriptor), fileno(stdout));
-					fclose(file_descriptor);
+					// fclose(file_descriptor);
 				}
 				else if (i != command_to_execute.commands.size() - 1)
 				{
@@ -269,7 +269,6 @@ int main()
 				perror("Error: ");
 				exit(pid);
 			}
-
 		}
 
 		std::cout << "> ";
